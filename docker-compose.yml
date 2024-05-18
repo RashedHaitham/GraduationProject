@@ -13,7 +13,7 @@ services:
       - my-app-network
 
   chat:
-    build: ./ChatService
+    build: ./ChatMicroservice
     container_name: ChatService
     restart: always
     ports:
