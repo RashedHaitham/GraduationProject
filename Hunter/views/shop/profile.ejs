@@ -1,0 +1,72 @@
+<%- include('../includes/head.ejs') %>
+<body style="background-color: #f3f3f3;">
+    <%- include('../includes/navigation.ejs') %>
+    <main class="m-5 ">
+        <h3 class="text-center mb-4">welcome to <%= user.firstName %>'s profile</h3>
+        <div class="mx-auto text-center"> <!-- Added classes mx-auto and text-center -->
+            <div class="row mb-4">
+              <div class="col">
+                <div>
+                    <%= user.firstName %>'s Full Name: <span><%= user.firstName %> <%= user.lastName %></span>
+                </div>
+              </div>
+            </div>
+            <div class="mb-4">
+                <%= user.firstName %>'s Email: <span><%= user.email %></span>
+            </div>
+            <div class="mb-4">
+                <%= user.firstName %>'s Phone Number:
+                <span><%= user.number ? user.number : 'Not provided' %></span>
+              </div>
+              <div class="mb-4">
+                About <%= user.firstName %>:
+                <span><%= user.about ? user.about : 'Not provided' %></span>
+              </div>
+              
+             <%if (isCus) {%>
+                <form action="/product-orders/chat" method="post" class="mt-4">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <input type="hidden" name="userId" value="<%= userId %>" />
+                    <button type="submit" class="btn btn-success">Chat with <%= user.firstName %></button>
+                </form> 
+                <%}%>
+          </div>
+        <% if (products.length > 0) { %>
+            <h2><%= user.firstName %>'s products</h2>
+
+            <div class="row row-cols-2 row-cols-md-4 g-4 justify-content-center">
+                <% for (let product of products) { %>
+                    <div class="col">
+                        <div class="card text-center h-100">
+                            <img src="/<%= product.imageUrl %>" class="card-img-top img-fluid" alt="product image"/>
+                            <div class="card-body">
+                              <h2 class="card-title"><%= product.title %></h2>
+                              <div class="card-text">
+                                <h4>$
+                                    <%= product.price %>
+                                  </h4>
+                              <p>
+                                <%= product.description %>
+                              </p>
+                              </div>
+                            </div>
+                            <div>
+                                <a href="/products/<%= product._id %>" class="btn btn-info mb-3">Details</a>
+                                <% if (isAuthenticated && isCus) { %>
+                                    <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                <% } %>
+                            </div>
+                        </div>
+                        </div>
+                    <% } %>
+            </div>
+        </div>
+            <%- include('../includes/pagination.ejs', {currentPage: currentPage, nextPage: nextPage, previousPage: previousPage, lastPage: lastPage, hasNextPage: hasNextPage, hasPreviousPage: hasPreviousPage}) %>
+            <% } else { %>
+                <div class="none" style="min-height: 100vh;">
+                    <h1>No Products Found!</h1>
+                </div>
+                <% } %>
+    </main>
+    
+<%- include('../includes/end.ejs') %>

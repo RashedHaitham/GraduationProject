@@ -1,0 +1,29 @@
+version: '3'
+networks:
+  my-app-network:
+
+services:
+  hunter:
+    build: ./Hunter
+    restart: always
+    container_name: Hunter
+    ports:
+      - "3000:3000"
+    networks:
+      - my-app-network
+
+  chat:
+    build: ./ChatService
+    container_name: ChatService
+    restart: always
+    ports:
+      - "3001:3001"
+    networks:
+      - my-app-network
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - my-app-network

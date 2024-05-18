@@ -1,0 +1,35 @@
+<ul class="pagination justify-content-center align-items-center">
+  <li class="page-item">
+    <a class="page-link" href="?page=1" aria-label="Previous">
+      <span aria-hidden="true" style="font-size: x-large;">&laquo;</span>
+    </a>
+  </li>
+
+  <% if (currentPage !== 1 && previousPage !== 1) { %>
+  <li class="page-item">
+    <a class="page-link" href="?page=1" style="font-size: large;">1</a>
+  </li>
+  <% } %> <% if (hasPreviousPage) { %>
+  <li class="page-item">
+    <a class="page-link" href="?page=<%= previousPage %>" style="font-size: large;"
+      ><%= previousPage %></a
+    >
+  </li>
+  <% } %>
+<li class="page-item">
+    <a  href="?page=<%= currentPage %>" class="page-link" style="font-size: large;"><%= currentPage %></a>
+</li>  <% if (hasNextPage) { %>
+  <li class="page-item">
+    <a href="?page=<%= nextPage %>" class="page-link" style="font-size: large;"><%= nextPage %></a>
+  </li>
+  <% } %> <% if (lastPage !== currentPage && nextPage !== lastPage) { %>
+<li class="page-item">
+    <a href="?page=<%= lastPage %>" class="page-link" style="font-size: large;"><%= lastPage %></a>
+</li>  <% } %>
+
+  <li class="page-item">
+    <a class="page-link" href="?page=<%= lastPage %>" aria-label="Next">
+      <span aria-hidden="true" style="font-size: x-large;">&raquo;</span>
+    </a>
+  </li>
+</ul>

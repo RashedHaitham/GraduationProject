@@ -1,0 +1,148 @@
+<%- include('../includes/head.ejs') %>
+</head>
+
+<body>
+   <%- include('../includes/navigation.ejs') %>
+
+    <main class="w-100 p-4 d-flex justify-content-center mt-5" style="min-height: 100vh;">
+        <form action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype="multipart/form-data">
+            <% if (errorMessage) { %>
+                <div class="text-center alert alert-danger"><%= errorMessage %></div>
+            <% } %>
+            <!-- title input -->
+            <div class="form-outline mb-4">
+              <input
+              class="form-control <%= validationErrors.find(e => e.param === 'title') ? 'alert alert-danger' : '' %>"
+                        type="text" 
+                        name="title" 
+                        id="title" 
+                        value="<% if (editing || hasError) { %><%= product.title %><% } %>""
+              />
+              <label class="form-label" for="title">Title</label>
+            </div>
+          
+            <!-- img input -->
+                <label class="form-label" for="image">Image</label>
+                <input type="file" 
+                name="image" 
+                id="image" class="form-control mb-4" />
+            <!--price input-->        
+            <label class="form-label" for="price">Price</label>
+    
+                <div class="input-group mb-3">
+                    <span class="input-group-text">$</span>
+                    <input
+                    class="form-control <%= validationErrors.find(e => e.param === 'price') ? 'invalid' : '' %>"
+                    type="number" 
+                    name="price" 
+                    id="price" 
+                    step="0.01" 
+                    min="0"
+                    value="<% if (editing || hasError) { %><%= product.price %><% } %>"
+                    />
+                    
+                  </div>
+            <!-- descreption input -->
+            <div class="form-outline mb-4">
+                <textarea 
+                    class="form-control <%= validationErrors.find(e => e.param === 'description') ? 'invalid' : '' %>"
+                    name="description" 
+                    id="description" 
+                    rows="5"><% if (editing || hasError) { %><%= product.description %><% } %></textarea>
+                    <label class="form-label" for="description">Description</label>
+            </div>
+                <!-- Additional input fields, initially hidden -->
+                <div id="electronicsFields" class="additional-fields" style="<%= (editing && product && product.category === 'Electronics') ? 'display: block;' : 'display: none;' %>">
+                    <!-- Electronics fields -->
+                    <div class="form-outline mb-4">
+                        <input type="text" id="warranty" name="warranty" class="form-control" value="<%= (editing && product && product.category === 'Electronics') ? product.electronics.warranty : '' %>" />
+                        <label class="form-label" for="warranty">Warranty Period</label>
+                    </div>
+                </div>
+                
+                <div id="clothingFields" class="additional-fields" style="<%= (editing && product && product.category === 'Clothing') ? 'display: block;' : 'display: none;' %>">
+                    <!-- Clothing fields -->
+                    <div class="form-outline mb-4">
+                        <input type="text" id="size" name="size" class="form-control" value="<%= (editing && product && product.category === 'Clothing') ? product.clothing.size : '' %>" />
+                        <label class="form-label" for="size">Size</label>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <input type="text" id="material" name="material" class="form-control" value="<%= (editing && product && product.category === 'Clothing') ? product.clothing.material : '' %>" />
+                        <label class="form-label" for="material">Material</label>
+                    </div>
+                </div>
+                
+                <div id="booksFields" class="additional-fields" style="<%= (editing && product && product.category === 'Books') ? 'display: block;' : 'display: none;' %>">
+                    <!-- Books fields -->
+                    <div class="form-outline mb-4">
+                        <input type="text" id="author" name="author" class="form-control" value="<%= (editing && product && product.category === 'Books') ? product.books.author : '' %>" />
+                        <label class="form-label" for="author">Author</label>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <input type="text" id="isbn" name="isbn" class="form-control" value="<%= (editing && product && product.category === 'Books') ? product.books.isbn : '' %>" />
+                        <label class="form-label" for="isbn">ISBN</label>
+                    </div>
+                </div>
+                
+                <div id="toysFields" class="additional-fields" style="<%= (editing && product && product.category === 'Toys') ? 'display: block;' : 'display: none;' %>">
+                    <!-- Toys fields -->
+                    <div class="form-outline mb-4">
+                        <input type="text" id="ageRange" name="ageRange" class="form-control" value="<%= (editing && product && product.category === 'Toys') ? product.toys.ageRange : '' %>" />
+                        <label class="form-label" for="ageRange">Age Range</label>
+                    </div>
+                </div>
+                
+            <div class="form-outline mb-4">
+                <!-- Category input -->
+                <label class="form-label" for="category">Category</label>
+                <select class="form-select" name="category" id="category" required>
+                    <option value="" disabled selected>Select category</option>
+                    <option value="Electronics" <% if (editing || hasError) { if (product.category === 'Electronics') { %> selected <% } } %>>Electronics</option>
+                    <option value="Clothing" <% if (editing || hasError) { if (product.category === 'Clothing') { %> selected <% } } %>>Clothing</option>
+                    <option value="Books" <% if (editing || hasError) { if (product.category === 'Books') { %> selected <% } } %>>Books</option>
+                    <option value="Toys" <% if (editing || hasError) { if (product.category === 'Toys') { %> selected <% } } %>>Toys</option>
+                </select>
+            </div>                    
+        
+            <!-- Submit button -->
+            <% if (editing) { %>
+                <input type="hidden" value="<%= product._id %>" name="productId">
+            <% } %>
+    
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-success btn-block mb-4" type="submit"><% if (editing) { %>Update Product<% } else { %>Add Product<% } %></button>
+                  </form>
+    </main>
+   <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const categorySelect = document.getElementById('category');
+        const additionalFields = {
+            Electronics: document.getElementById('electronicsFields'),
+            Clothing: document.getElementById('clothingFields'),
+            Books: document.getElementById('booksFields'),
+            Toys: document.getElementById('toysFields')
+        };
+
+        function showFields(category) {
+            for (const key in additionalFields) {
+                additionalFields[key].style.display = 'none';
+            }
+
+            if (additionalFields[category]) {
+                additionalFields[category].style.display = 'block';
+            }
+        }
+        
+        showFields(categorySelect.value);
+        categorySelect.addEventListener('change', function () {
+            showFields(categorySelect.value);
+        });
+
+        });
+   </script>
+
+
+
+
+        
+<%- include('../includes/end.ejs') %>

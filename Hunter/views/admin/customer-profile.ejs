@@ -1,0 +1,32 @@
+<%- include('../includes/head.ejs') %>
+</head>
+
+<body>
+   <%- include('../includes/navigation.ejs') %>
+
+
+   <main class="w-100 p-4 d-flex justify-content-center mt-5" style="min-height: 100vh;">
+    <div class="mx-auto text-center"> <!-- Added classes mx-auto and text-center -->
+      <h3 class="mb-4">Customers Profile</h3>
+      <div class="row mb-4">
+        <div class="col">
+          <div>
+            Customer Full Name: <span><%= user.firstName %> <%= user.lastName %></span>
+          </div>
+        </div>
+      </div>
+      <div class="mb-4">
+        Customer Email: <span><%= user.email %></span>
+      </div>
+      <div class="mb-4">
+        Customer Phone Number: <span><%= user.number %></span>
+      </div>
+      <form action="/product-orders/chat" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="hidden" name="userId" value="<%= userId %>" />
+        <button type="submit" class="btn btn-success mb-4">Chat with <%= user.firstName %></button>
+    </form> 
+    <a class="btn btn-primary btn-block mb-4" href="/admin/product-orders">Back to orders</a>   
+    </div>
+  </main>
+   <%- include('../includes/end.ejs') %>

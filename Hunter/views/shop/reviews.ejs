@@ -1,0 +1,50 @@
+<%- include('../includes/head.ejs') %>
+</head>
+<body style="background-color: #f3f3f3;">
+    <%- include('../includes/navigation.ejs') %>
+    <div class="container mb-5 mt-5">
+        <h3><%= productName %> Reviews</h3>
+        <% if (reviews.length === 0) { %>
+            <h1 class="none">No reviews yet.</h1>
+        <% } else { %>
+            <div class="list-group">
+                <% reviews.forEach((review, index) => { %>
+                    <div class="list-group-item">
+                        <h5 class="mb-1">Rating: <%= review.rating %> stars</h5>
+                        <p class="mb-1">User: <%= userDetails[index].firstName %> <%= userDetails[index].lastName %></p>
+                        <p class="mb-1">Message: <%= review.text %></p>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+               
+    <% if (isCus) { %>
+
+    <div class="container d-flex ">
+        <form class="mt-4"  action="/product/reviews" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="productId" value="<%= productId %>">
+            <h3>Add Your Review</h3><br>
+            <div class="form-outline mb-3" data-mdb-input-init>
+                <textarea class="form-control" name="text" id="textArea" rows="4"></textarea>
+                <label class="form-label" for="textArea">Review Text</label>
+              </div>
+            
+            <div class="mb-3">
+                <label for="rating" class="form-label">Rating:</label>
+                <select id="rating" name="rating" class="form-select">
+                    <option value="1">1 star</option>
+                    <option value="2">2 stars</option>
+                    <option value="3">3 stars</option>
+                    <option value="4">4 stars</option>
+                    <option value="5">5 stars</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mb-4">Submit Review</button>
+        </form>
+    </div>     
+       <%}%>
+
+</body>
+<%- include('../includes/end.ejs') %>

@@ -1,0 +1,60 @@
+<%- include('../includes/head.ejs') %>
+</head>
+
+<body>
+   <%- include('../includes/navigation.ejs') %>
+
+
+<main class="w-100 p-4 d-flex justify-content-center mt-5" style="min-height: 100vh;">
+    <form action="/admin/profile" method="POST" enctype="multipart/form-data">
+        <h3 class="text-center mb-4">Edit your profile</h3>
+        <!-- 2 column grid layout with text inputs for the first and last names -->
+        <div class="row mb-4">
+          <div class="col">
+            <div class="form-outline">
+              <input type="text" name="newFirst" id="form6Example1" class="form-control" value="<%= user.firstName %>" />
+              <label class="form-label" for="form6Example1">First name</label>
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-outline">
+              <input type="text" name="newLast" id="form6Example2" class="form-control" value="<%= user.lastName %>"  />
+              <label class="form-label" for="form6Example2">Last name</label>
+            </div>
+          </div>
+        </div>
+        <!-- Email input -->
+        <div class="form-outline mb-4">
+          <input type="email" name="newEmail" id="form6Example5" class="form-control" value="<%= user.email %>"  />
+          <label class="form-label" for="form6Example5">Email</label>
+        </div>
+      
+        <!-- Number input -->
+        <div class="form-outline mb-4">
+          <input type="number" name="newNumber" id="form6Example6" class="form-control" value="<%= user.number %>"  />
+          <label class="form-label" for="form6Example6">Phone Number</label>
+        </div>
+
+        <!-- About -->
+        <%if (isVendor){%>
+        <div class="form-outline mb-4">
+          <textarea rows="5" name="newAbout" id="form7Example7" class="form-control"><%= user.about %></textarea>
+          <label class="form-label" for="form7Example6=7">About</label>
+        </div>
+          <%}%>
+        <!-- Password -->
+        <div class="form-outline mb-4">
+          forgot password ? <a href="/reset/<%=user.resetToken%>" class="">
+            change password
+          </a>
+        </div>
+        
+        <input type="hidden" value="<%= user._id %>" name="userId">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary btn-block mb-4">Save</button>
+      </form>
+      
+</main>
+
+   <%- include('../includes/end.ejs') %>

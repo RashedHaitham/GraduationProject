@@ -1,0 +1,42 @@
+<%- include('../includes/head.ejs') %>    
+    </head>
+
+    <body style="background-color: #f3f3f3;">
+        <%- include('../includes/navigation.ejs') %>
+        <main class="w-100 p-4 d-flex flex-column align-items-center mt-5" style="min-height: 100vh;">
+            <ol class="list-group list-group-light " style="width: 30rem;">
+                <% products.forEach(p => { %>
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">
+                                <%= p.productId.title %>
+                            </div>
+                            Quantity: <span class="badge badge-dark rounded-pill"><%= p.quantity %> x $<%=p.productId.price%></span>
+                        </div>
+                    </li>
+                <% }) %>
+            </ol>
+            <div class="text-center mt-3">
+                <h2>Total: $<%= totalSum %></h2>
+            </div>
+            <div class="text-center mt-3">
+                <form action="/create-order" method="POST">
+                    <script
+                      src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                      data-key="pk_test_51NkrmbAhcc8qxTctyvkhjVccudKv7OIcE3HNEAS08FqOOKSvcF3pI7doHK4kujMYR6ueFifW4S8mYLqw9u6c3qTo00AmDWE6nH"
+                      data-amount="<%= totalSum * 100 %>"
+                      data-name="Your Order"
+                      data-description="All the items you ordewred"
+                      data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                      data-locale="auto"
+                      data-currency="usd">
+                    </script>
+                  </form>
+            </div>
+        </main>
+
+
+      
+        
+
+        <%- include('../includes/end.ejs') %>

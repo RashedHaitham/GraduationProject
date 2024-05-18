@@ -1,0 +1,166 @@
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-red">
+    <div class="container-fluid">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-mdb-toggle="collapse"
+        data-mdb-target="#navbarExample01"
+        aria-controls="navbarExample01"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarExample01">
+        <a class="navbar-brand mt-2 mt-lg-0" href="">
+          <img
+            src="/images/logo.png"
+            height="50"
+            width="100%"
+            alt="Logo"
+            loading="lazy"
+          />
+        </a>
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link <%= path === '/' ? 'active' : '' %>" href="/"
+              >Shop</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/products' ? 'active' : '' %>"
+              href="/products"
+              >Products</a
+            >
+          </li>
+          <% if (isAuthenticated) { %>
+            <%if (isCus){%>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/cart' ? 'active' : '' %>"
+              href="/cart"
+              >Cart</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/orders' ? 'active' : '' %>"
+              href="/orders"
+              >Orders</a
+            >
+          </li>
+          <%}%>
+          <% if (isVendor) { %>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/admin/add-product' ? 'active' : '' %>"
+              href="/admin/add-product"
+              >Add Product
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/admin/products' ? 'active' : '' %>"
+              href="/admin/products"
+              >Admin Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/admin/product-orders' ? 'active' : '' %>"
+              href="/admin/product-orders"
+              >Customer Orders
+            </a>
+          </li>
+          <% } %> <% } %>
+        </ul>
+
+        <div class="d-flex align-items-center">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <% if (!isAuthenticated) { %>
+
+            <li class="nav-item px-md-3 me-md-2">
+              <a href="/login" class="nav-link text-light">Login</a>
+            </li>
+            <button type="button" class="btn btn-light me-md-3">
+              <a href="/signup" class="text-dark">Sign up</a>
+            </button>
+            <% } else { %>
+            <li class="nav-item">
+              <div class="chatbox-button">
+                <div class="btn btn-light me-md-3">
+                  <i
+                    class="fas fa-comment"
+                    style="color: darkred; font-size: 1.3rem"
+                  ></i>
+                </div>
+              </div>
+
+              <div id="chatModal" class="modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title text-dark">Chat</h5>
+                      <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                      ></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="chatbox-messages m-2" id="chatMessages"></div>
+                      <input
+                        type="text"
+                        id="chat-input"
+                        class="form-control"
+                        placeholder="Type your message..."
+                      />
+                    </div>
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        id="send-button"
+                        class="btn btn-primary"
+                      >
+                        Send
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <div class="dropdown">
+            <a
+              class="dropdown-toggle d-flex align-items-center hidden-arrow m-2"
+              id="navbarDropdownMenuAvatar"
+              role="button"
+              data-mdb-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="fas fa-user text-light"></i>
+            </a>
+            <ul
+              class="dropdown-menu dropdown-menu-end"
+              aria-labelledby="navbarDropdownMenuAvatar"
+            >
+              <li>
+                <a class="dropdown-item" href="/admin/profile">My profile</a>
+              </li>
+              <li>
+                <form class="" action="/logout" method="post">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <button class="dropdown-item" type="submit">Logout</button>
+                </form>
+              </li>
+            </ul>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>

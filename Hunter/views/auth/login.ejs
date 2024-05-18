@@ -1,0 +1,49 @@
+<%- include('../includes/head.ejs') %>
+
+</head>
+
+<body>
+   <%- include('../includes/navigation.ejs') %>
+<section class="w-100 p-4 d-flex justify-content-center mt-5" style="min-height: 100vh;">
+  
+    <form action="/login" style="width: 24rem;" method="POST" novalidate>
+
+        <% if (errorMessage) { %>
+            <h5 class="text-center alert alert-danger" ><%= errorMessage %></h5>
+        <% } %>
+        <!-- Email input -->
+        <div class="form-outline mb-4">
+          <input type="email" id="email" name="email" value="<%= oldInput.email %>" class="form-control <%= validationErrors.find(e => e.param === 'email') ? 'alert-danger' : '' %>"  />
+          <label class="form-label" for="email">Email address</label>
+        </div>
+      
+        <!-- Password input -->
+        <div class="form-outline mb-4">
+          <input  type="password" id="password" name="password" value="<%= oldInput.password %>" class="form-control <%= validationErrors.find(e => e.param === 'password') ? 'alert-danger' : '' %>" />
+          <label class="form-label" for="password">Password</label>
+        </div>
+      
+        <!-- 2 column grid layout for inline styling -->
+        <div class="row mb-4">
+          <div class="col d-flex justify-content-center">
+            <!-- Checkbox -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="form1Example3" checked />
+              <label class="form-check-label" for="form1Example3"> Remember me </label>
+            </div>
+          </div>
+      
+          <div class="col">
+            <!-- Simple link -->
+            <a href="/reset">Forgot password?</a>
+          </div>
+        </div>
+      
+        <!-- Submit button -->
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="btn btn-danger bg-red btn-block">Login</button>
+      </form>
+</section>
+
+
+<%- include('../includes/end.ejs') %>

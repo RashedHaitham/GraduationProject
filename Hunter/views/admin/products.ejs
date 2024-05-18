@@ -1,0 +1,52 @@
+<%- include('../includes/head.ejs') %>
+    </head>
+
+    <body style="background-color: #f3f3f3;">
+      <%- include('../includes/navigation.ejs') %>
+
+            <main class="m-5" style="min-height: 100vh;">
+                <% if (prods.length > 0) { %>
+                    <div class="row row-cols-1 row-cols-md-4 g-4 justify-content-center">
+                    
+                        <% for (let product of prods) { %>
+                            <div class="col">
+                            <div class="card text-center h-100">
+                                <img src="/<%= product.imageUrl %>" class="card-img-top img-fluid" alt="product image"/>
+                                <div class="card-body">
+                                  <h2 class="card-title"><%= product.title %></h2>
+                                  <div class="card-text">
+                                    <h4>$
+                                        <%= product.price %>
+                                      </h4>
+                                  <p>
+                                    <%= product.description %>
+                                  </p>
+                                  </div>
+                                  </div>
+                                  <div>
+                                    <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn btn-primary mb-3">Edit</a>
+                                    <input type="hidden" value="<%= product._id %>" name="productId">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button class="btn btn-danger mb-3" type="button" onclick="deleteProduct(this)">Delete</button>
+                                </div>                    
+                            </div>
+                            </div>
+                            <% } %>
+                            </div>
+                    <% } else { %>
+                        <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+                            <div class="none">
+                              <h1>No Products Found!</h1>
+                            </div>
+                          </div>
+                        <% } %>
+
+
+                        
+            </main>
+            <%- include('../includes/end.ejs') %>
+            <script src="/js/admin.js"></script>
+
+
+            
+

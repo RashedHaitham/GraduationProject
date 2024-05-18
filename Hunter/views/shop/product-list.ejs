@@ -1,0 +1,106 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" type="text/css" href="/css/product.css">
+    </head>
+
+    <body style="background-color: #f3f3f3;">
+        <%- include('../includes/navigation.ejs') %>
+            <main class="m-5 ">
+              <div class="container mb-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                      <form action="/filtered/products" method="get" enctype="multipart/form-data" novalidate>
+                        <div class="input-group mb-4">
+                            <div class="form-outline" data-mdb-input-init>
+                                <input name="searchTerm" type="search" id="searchInput" class="form-control" />
+                                <label class="form-label" for="searchInput">Search</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="searchButton" data-mdb-ripple-init>
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="form-outline mb-4">
+                          <select name="category" class="form-select">
+                              <option value="">All Categories</option>
+                              <option value="Electronics">Electronics</option>
+                              <option value="Clothing">Clothing</option>
+                              <option value="Books">Books</option>
+                              <option value="Toys">Toys</option>
+                            </select>
+                      </div>
+                        <div class="multi-range-slider">
+                            <input name="low" type="range" min="<%= minPrice %>" max="<%= maxPrice %>" value="<%= minPrice %>" class="mdb-range" id="lowerSlider">
+                            <input name="high" type="range" min="<%= minPrice %>" max="<%= maxPrice %>" value="<%= maxPrice %>" class="mdb-range" id="upperSlider">
+                        </div>
+                        <span class="output">Selected Range: <span id="minVal"><%= minPrice %></span> - <span id="maxVal"><%= maxPrice %></span></span>
+                    </form>
+                                                  
+                    </div>
+                </div>
+            </div>
+            
+                <% if (prods.length > 0) { %>   
+                    <div class="row row-cols-2 row-cols-md-4 g-4 justify-content-center">
+                        <% for (let product of prods) { %>
+                            <div class="col">
+                                <div class="card text-center h-100">
+                                    <img src="/<%= product.imageUrl %>" class="card-img-top img-fluid" alt="product image"/>
+                                    <div class="card-body">
+                                      <h2 class="card-title"><%= product.title %></h2>
+                                      <div class="card-text">
+                                        <h4>$
+                                            <%= product.price %>
+                                          </h4>
+                                      <p>
+                                        <%= product.description %>
+                                      </p>
+                                      </div>
+                                    </div>
+                                    <div>
+                                        <a href="/products/<%= product._id %>" class="btn btn-info mb-3">Details</a>
+                                        <% if (isAuthenticated && isCus) { %>
+                                            <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                </div>
+                            <% } %>
+                    </div>
+                </div>
+                    <%- include('../includes/pagination.ejs', {currentPage: currentPage, nextPage: nextPage, previousPage: previousPage, lastPage: lastPage, hasNextPage: hasNextPage, hasPreviousPage: hasPreviousPage}) %>
+                    <% } else { %>
+                        <div class="none" style="min-height: 100vh;">
+                            <h1>No Products Found!</h1>
+                        </div>
+                        <% } %>
+            </main>
+            <script>
+            const lowerSlider = document.getElementById("lowerSlider");
+            const upperSlider = document.getElementById("upperSlider");
+            const sliderRange = document.createElement("div");
+
+            const minValOutput = document.getElementById("minVal");
+            const maxValOutput = document.getElementById("maxVal");
+
+            function updateSlider() {
+            const minVal = parseInt(lowerSlider.value);
+            const maxVal = parseInt(upperSlider.value);
+            let flag = false;
+            if (minVal >= maxVal) {
+                lowerSlider.value = maxVal;
+                flag = true;
+            }
+
+            sliderRange.style.left = `${minVal}%`;
+            sliderRange.style.width = `${maxVal - minVal}%`;
+            minValOutput.textContent = flag ? maxVal : minVal;
+            maxValOutput.textContent = maxVal;
+            }
+
+            lowerSlider.addEventListener("input", updateSlider);
+            upperSlider.addEventListener("input", updateSlider);
+            </script>
+            <%- include('../includes/end.ejs') %>
+
+
+        
+                    

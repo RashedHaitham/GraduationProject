@@ -1,0 +1,72 @@
+<%- include('../includes/head.ejs') %>
+
+</head>
+
+<body>
+   <%- include('../includes/navigation.ejs') %>
+
+    <main class="w-100 p-4 d-flex justify-content-center mt-5" style="min-height: 100vh;">
+        
+        <form style="width: 22rem;" action="/signup" method="POST" novalidate>
+          <h3 class="text-center mb-4">Sign Up</h3>
+
+            <% if (errorMessage) { %>
+                <h5 class="text-center alert alert-danger" ><%= errorMessage %></h5>
+            <% } %>
+            <div class="row mb-4">
+              <div class="col">
+                <div class="form-outline">
+                  <input type="text" name="firstName" id="form6Example1" value="<%= oldInput.firstName %>" class="form-control"  />
+                  <label class="form-label" for="form6Example1">First name</label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-outline">
+                  <input type="text" name="lastName" value="<%= oldInput.lastName %>" id="form6Example2" class="form-control"   />
+                  <label class="form-label" for="form6Example2">Last name</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email input -->
+            <div class="form-outline mb-4">
+              <input type="email" id="email" name="email" value="<%= oldInput.email %>" class="form-control <%= validationErrors.find(e => e.param === 'email') ? 'alert-danger' : '' %>" />
+              <label class="form-label" for="email">Email address</label>
+            </div>
+          
+            <!-- Password input -->
+            <div class="form-outline mb-4">
+              <input type="password" name="password" id="password" value="<%= oldInput.password %>" class="form-control <%= validationErrors.find(e => e.param === 'password') ? 'alert-danger' : '' %>" />
+              <label class="form-label" for="password">Password</label>
+            </div>
+
+            <div class="form-outline mb-4">
+                <input type="password" name="confirmPassword" id="confirmPassword" value="<%= oldInput.confirmPassword %>" class="form-control <%= validationErrors.find(e => e.param === 'confirmPassword') ? ' alert-danger' : '' %>" />
+                <label class="form-label" for="confirmPassword">Confirm password</label>
+              </div>
+
+              <div class="form-outline mb-4">
+                <input type="text" name="number" id="number" value="<%= oldInput.number %>" class="form-control" />
+                <label class="form-label" for="number">Phone number (optional)</label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="userType" id="flexRadioDefault1" value="customer" checked/>
+                <label class="form-check-label" for="flexRadioDefault1"> im a customer </label>
+              </div>
+
+              <div class="form-check mb-4">
+                <input class="form-check-input" type="radio" name="userType" value="vendor" id="flexRadioDefault2"/>
+                <label class="form-check-label" for="flexRadioDefault2"> im a vendor </label>
+              </div>
+          
+            <!-- Submit button -->
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" class="btn btn-danger bg-red btn-block">Sign up</button>
+          </form>
+
+    </main>
+
+
+
+<%- include('../includes/end.ejs') %>
