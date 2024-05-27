@@ -41,7 +41,7 @@ function sendMessage() {
     }),
     headers: { 
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer 9SofBEfYwtYVP2y9cQ2qHBS7b9R1eWgFue5cWB8u' 
+        'Authorization': 'Bearer ${process.env.CODY_API_TOKEN}' 
     }
 })
 .then(response => {
