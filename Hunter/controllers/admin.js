@@ -40,7 +40,7 @@ function moveFile(file, sourceDir, destinationDir) {
       console.error("Error reading directory:", err);
       return;
     }
-
+ 
     if (files.length > 0) {
       const sourcePath = path.join(sourceDir, file);
       const destinationPath = path.join(destinationDir, file);
