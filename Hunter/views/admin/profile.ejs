@@ -3,8 +3,6 @@
 
 <body>
    <%- include('../includes/navigation.ejs') %>
-
-
 <main class="w-100 p-4 d-flex justify-content-center mt-5" style="min-height: 100vh;">
     <form action="/admin/profile" method="POST" enctype="multipart/form-data">
         <h3 class="text-center mb-4">Edit your profile</h3>
@@ -43,7 +41,7 @@
         </div>
           <%}%>
         <!-- Password -->
-        <div class="form-outline mb-4">
+        <div class="mb-4">
           forgot password ? <a href="/reset/<%=user.resetToken%>" class="">
             change password
           </a>

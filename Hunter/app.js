@@ -36,7 +36,7 @@ const csrfProtection = csrf();
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "images");
+    cb(null, "images/productImages");
   },
   filename: (req, file, cb) => {
     cb(null, uuidv4() + "-" + file.originalname);
@@ -72,6 +72,8 @@ app.use(compression());
 app.use(morgan("combined", { stream: accessLogStream }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
 );
@@ -92,14 +94,11 @@ app.use(flash());
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.session.isLoggedIn;
- // res.locals.isCus = (req.session.user.userType)==="customer";
-  //res.locals.isVendor = (req.session.user.userType)==="vendor";
-
   next();
 });
 
+
 app.use((req, res, next) => {
-  // throw new Error('Sync Dummy');
   if (!req.session.user) {
     return next();
   }
@@ -111,6 +110,7 @@ app.use((req, res, next) => {
       req.user = user;
       res.locals.isVendor = (req.session.user.userType)==="vendor";
       res.locals.isCus = (req.session.user.userType)==="customer";
+      res.locals.token=process.env.CODY_API_TOKEN;
       next();
     })
     .catch((err) => {

@@ -1,10 +1,46 @@
 <%- include('../includes/head.ejs') %>
+
+<style>
+     .slider-container {
+            width: 200px; /* Set the width of the slider box */
+            height: 300px; /* Set the height of the slider box */
+            overflow: hidden;
+            position: relative;
+            margin: 20px auto; 
+        }
+        .slider {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        .slider img {
+            width: 200px; /* Ensure images fit the slider box width */
+            height: 300px; /* Ensure images fit the slider box height */
+            object-fit: cover; /* Cover the entire slider box */
+        }
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+        }
+        .slider-nav button {
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+        .slider img.selected {
+            border: 4px solid rgb(0, 124, 202); /* Add a border to indicate selection */
+        }
+</style>
 </head>
 
 <body>
    <%- include('../includes/navigation.ejs') %>
 
-    <main class="w-100 p-4 d-flex justify-content-center mt-5" style="min-height: 100vh;">
+    <main class="w-100 p-4 d-flex justify-content-center mt-5" style="min-height: 170vh;">
         <form action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype="multipart/form-data">
             <% if (errorMessage) { %>
                 <div class="text-center alert alert-danger"><%= errorMessage %></div>
@@ -26,6 +62,31 @@
                 <input type="file" 
                 name="image" 
                 id="image" class="form-control mb-4" />
+
+            <!-- promt input -->
+            <div class="form-check">
+                <input name="isGenerated" type="checkbox" class="form-check-input" id="toggleCheckbox">
+                <label class="form-check-label" for="toggleCheckbox">Would you like to modify the image using AI?</label>
+            </div>
+            <div class="form-group mt-3" id="textAreaContainer" style="display: none;">
+                <textarea name="prompt" class="form-control" id="textArea" rows="3" placeholder="Enter your prompt here"></textarea>
+            </div>
+            <button type="button" id="generateButton" class="btn btn-primary mt-3 mb-3" style="display: none;" disabled>Generate Images</button>            
+
+            <div id="imgSlider" class="slider-container" style="display: none;">
+                <div class="slider">
+                    <img src="https://via.placeholder.com/200x300?text=Image+1" alt="Image 1">
+                    <img src="https://via.placeholder.com/200x300?text=Image+2" alt="Image 2">
+                    <img src="https://via.placeholder.com/200x300?text=Image+3" alt="Image 3">
+                    <img src="https://via.placeholder.com/200x300?text=Image+4" alt="Image 4">
+                </div>
+                <div class="slider-nav">
+                    <button type="button" id="prev"><i class="fas fa-chevron-left"></i></button>
+                    <button type="button" id="next"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <input type="hidden" id="selectedImageSrc" name="selectedImageSrc">
+
             <!--price input-->        
             <label class="form-label" for="price">Price</label>
     
@@ -92,17 +153,15 @@
                     </div>
                 </div>
                 
-            <div class="form-outline mb-4">
                 <!-- Category input -->
                 <label class="form-label" for="category">Category</label>
-                <select class="form-select" name="category" id="category" required>
+                <select class="form-select mb-4" name="category" id="category" required>
                     <option value="" disabled selected>Select category</option>
                     <option value="Electronics" <% if (editing || hasError) { if (product.category === 'Electronics') { %> selected <% } } %>>Electronics</option>
                     <option value="Clothing" <% if (editing || hasError) { if (product.category === 'Clothing') { %> selected <% } } %>>Clothing</option>
                     <option value="Books" <% if (editing || hasError) { if (product.category === 'Books') { %> selected <% } } %>>Books</option>
                     <option value="Toys" <% if (editing || hasError) { if (product.category === 'Toys') { %> selected <% } } %>>Toys</option>
                 </select>
-            </div>                    
         
             <!-- Submit button -->
             <% if (editing) { %>
@@ -111,9 +170,15 @@
     
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button class="btn btn-success btn-block mb-4" type="submit"><% if (editing) { %>Update Product<% } else { %>Add Product<% } %></button>
-                  </form>
+        </form>
+        
     </main>
-   <script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script>
+        'use strict';
+
         document.addEventListener('DOMContentLoaded', function () {
         const categorySelect = document.getElementById('category');
         const additionalFields = {
@@ -139,10 +204,112 @@
         });
 
         });
-   </script>
+
+        document.getElementById('toggleCheckbox').addEventListener('change', function() {
+    const textAreaContainer = document.getElementById('textAreaContainer');
+    const textArea = document.getElementById('textArea');
+    const generateButton = document.getElementById('generateButton');
+    const imageSlider=document.getElementById('imgSlider')
+
+    if (this.checked) {
+        textAreaContainer.style.display = 'block';
+        generateButton.style.display = 'inline-block';
+        imageSlider.style.display='block';
+    } else {
+        textAreaContainer.style.display = 'none';
+        textArea.value = '';
+        generateButton.style.display = 'none';
+        imageSlider.style.display='none';
+        $('.slider img').removeClass('selected');
+        $('#selectedImageSrc').val('');
+    }
+});
 
 
+    
+$('#generateButton').click(function() {
+    var isGenerated = $('#toggleCheckbox').is(':checked');
+    var prompt = $('#textArea').val();
+    var imageData = $('#image')[0].files[0]; // Get the image file data
+    const csrfToken = $('#csrfToken').val(); // Get the CSRF token
+
+    var data = {
+    isGenerated: isGenerated,
+    prompt: prompt,
+    image: imageData,
+    _csrf:csrfToken
+ };
+
+ var formData = new FormData();
+        formData.append('image', imageData);
+        formData.append('isGenerated', isGenerated);
+        formData.append('prompt', prompt);
+        formData.append('_csrf', csrfToken);
+ 
+      console.log(formData);
+$.ajax({
+    url: '/admin/generate-images',
+    type: 'post',
+    data: formData, 
+    contentType: false,
+    processData:false,
+    success: function(data) {
+        $('.slider').empty();
+        data.imagePaths.forEach(function(imagePath,index) {
+            $('.slider').append(`<img src="${imagePath}" alt="image-${index}" />`);
+        }); 
+    },
+    error: function(xhr, status, error) {
+        console.log('Error:', error);
+        console.log('Status:', status);
+        console.log('Response:', xhr.responseText);
+    }
+});
+});
 
 
-        
+$(document).ready(function() {
+            const $slider = $('.slider');
+            const $slides = $slider.find('img');
+            const totalSlides = $slides.length;
+            let currentIndex = 0;
+
+            $('#next').click(function() {
+                if (currentIndex < totalSlides - 1) {
+                    currentIndex++;
+                } else {
+                    currentIndex = 0;
+                }
+                updateSlider();
+            });
+
+            $('#prev').click(function() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                } else {
+                    currentIndex = totalSlides - 1;
+                }
+                updateSlider();
+            });
+
+            function updateSlider() {
+                const newTransform = -currentIndex * 200; // Adjust based on the width of the slider box
+                $slider.css('transform', `translateX(${newTransform}px)`);
+            }
+
+            $('#image').on('change', function() {
+                if ($(this).val()) {
+                    $('#generateButton').prop('disabled', false).show();
+                } else {
+                    $('#generateButton').prop('disabled', true).hide();
+                }
+            });
+
+            $('.slider').on('click', 'img', function() {
+                $('.slider img').removeClass('selected');
+                $(this).addClass('selected');
+                $('#selectedImageSrc').val($(this).attr('src'));
+            });
+        });
+   </script>  
 <%- include('../includes/end.ejs') %>

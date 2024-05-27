@@ -1,5 +1,4 @@
 <%- include('../includes/head.ejs') %>
-    <link rel="stylesheet" type="text/css" href="/css/product.css">
     </head>
 
     <body style="background-color: #f3f3f3;">
@@ -18,21 +17,21 @@
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
-                        <div class="form-outline mb-4">
-                          <select name="category" class="form-select">
+                          <select name="category" class="form-select mb-4">
                               <option value="">All Categories</option>
                               <option value="Electronics">Electronics</option>
                               <option value="Clothing">Clothing</option>
                               <option value="Books">Books</option>
                               <option value="Toys">Toys</option>
                             </select>
-                      </div>
-                        <div class="multi-range-slider">
-                            <input name="low" type="range" min="<%= minPrice %>" max="<%= maxPrice %>" value="<%= minPrice %>" class="mdb-range" id="lowerSlider">
-                            <input name="high" type="range" min="<%= minPrice %>" max="<%= maxPrice %>" value="<%= maxPrice %>" class="mdb-range" id="upperSlider">
-                        </div>
-                        <span class="output">Selected Range: <span id="minVal"><%= minPrice %></span> - <span id="maxVal"><%= maxPrice %></span></span>
-                    </form>
+                            <div class="multi-range-slider">
+                                <%= minPrice %>
+                                <input name="high" type="range" min="<%= minPrice %>" max="<%= maxPrice %>" value="<%= maxPrice %>" class="mdb-range" id="slider">
+                                <input name="low" type="hidden" value="<%= minPrice %>">
+                                <%= maxPrice %>
+                            </div>
+                            <span class="output">Selected Range: $<span id="minVal"><%= minPrice %></span> - $<span id="maxVal"><%= maxPrice %></span></span>                            
+                       </form>
                                                   
                     </div>
                 </div>
@@ -43,7 +42,7 @@
                         <% for (let product of prods) { %>
                             <div class="col">
                                 <div class="card text-center h-100">
-                                    <img src="/<%= product.imageUrl %>" class="card-img-top img-fluid" alt="product image"/>
+                                    <img src="/<%= product.imageUrl %>" class="card-img-top img-fluid" alt="product image" loading="lazy"/>
                                     <div class="card-body">
                                       <h2 class="card-title"><%= product.title %></h2>
                                       <div class="card-text">
@@ -74,30 +73,19 @@
                         <% } %>
             </main>
             <script>
-            const lowerSlider = document.getElementById("lowerSlider");
-            const upperSlider = document.getElementById("upperSlider");
-            const sliderRange = document.createElement("div");
+                document.addEventListener('DOMContentLoaded', function() {
+                const slider = document.getElementById('slider');
+                const minValOutput = document.getElementById('minVal');
+                const maxValOutput = document.getElementById('maxVal');
 
-            const minValOutput = document.getElementById("minVal");
-            const maxValOutput = document.getElementById("maxVal");
+                const minVal = parseInt(minValOutput.textContent);
+                maxValOutput.textContent = slider.value;
 
-            function updateSlider() {
-            const minVal = parseInt(lowerSlider.value);
-            const maxVal = parseInt(upperSlider.value);
-            let flag = false;
-            if (minVal >= maxVal) {
-                lowerSlider.value = maxVal;
-                flag = true;
-            }
-
-            sliderRange.style.left = `${minVal}%`;
-            sliderRange.style.width = `${maxVal - minVal}%`;
-            minValOutput.textContent = flag ? maxVal : minVal;
-            maxValOutput.textContent = maxVal;
-            }
-
-            lowerSlider.addEventListener("input", updateSlider);
-            upperSlider.addEventListener("input", updateSlider);
+                slider.addEventListener('input', function() {
+                    const maxVal = parseInt(slider.value);
+                    maxValOutput.textContent = maxVal;
+                });
+                });
             </script>
             <%- include('../includes/end.ejs') %>
 

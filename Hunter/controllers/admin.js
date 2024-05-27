@@ -3,9 +3,15 @@ const fileHelper = require("../util/file");
 const { validationResult } = require("express-validator/check");
 const crypto = require("crypto");
 
+const path = require("path");
+const fs = require("fs");
+const { v4: uuidv4 } = require("uuid");
+
 const Product = require("../models/product");
 const Order = require("../models/order");
 const User = require("../models/user");
+const { readFile } = require("node:fs/promises");
+const Replicate = require("replicate");
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -18,13 +24,144 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
+async function getImageBase64(imagePath) {
+  try {
+    const data = await readFile(imagePath);
+    return data.toString("base64");
+  } catch (error) {
+    console.error("Error reading the file:", error);
+  }
+}
+
+// Move a file from sourceDir to destinationDir
+function moveFile(file, sourceDir, destinationDir) {
+  fs.readdir(sourceDir, (err, files) => {
+    if (err) {
+      console.error("Error reading directory:", err);
+      return;
+    }
+
+    if (files.length > 0) {
+      const sourcePath = path.join(sourceDir, file);
+      const destinationPath = path.join(destinationDir, file);
+
+      fs.rename(sourcePath, destinationPath, (err) => {
+        if (err) {
+          console.error("Error moving file:", err);
+        } else {
+          console.log("File moved successfully.");
+          deleteFiles(sourceDir);
+        }
+      });
+    } else {
+      console.log("No files found in source directory.");
+    }
+  });
+}
+function deleteFiles(directory) {
+  fs.readdir(directory, (err, files) => {
+    if (err) {
+      console.error("Error reading directory:", err);
+      return;
+    }
+
+    files.forEach((file) => {
+      const filePath = path.join(directory, file);
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error("Error deleting file:", err);
+        } else {
+          console.log("File deleted:", filePath);
+        }
+      });
+    });
+  });
+}
+exports.generateImages = async (req, res, next) => {
+  const isGenerated = req.body.isGenerated === "true"; // Convert string to boolean
+  const prompt = req.body.prompt || "";
+  const image = req.file;
+  const imageUrl = image.path;
+
+  if (isGenerated) {
+    try {
+      const base64Data = await getImageBase64(imageUrl);
+      const imageDataUrl = `data:application/octet-stream;base64,${base64Data}`;
+
+      const replicate = new Replicate();
+      const input = {
+        prompt: prompt,
+        image_num: 4,
+        image_path: imageDataUrl,
+        product_size: "0.5 * width",
+        negative_prompt:
+          "illustration, 3d, sepia, painting, cartoons, sketch, (worst quality:2)",
+      };
+
+      const output = await replicate.run(
+        "logerzhu/ad-inpaint:b1c17d148455c1fda435ababe9ab1e03bc0d917cc3cf4251916f22c45c83c7df",
+        { input }
+      );
+
+      const imagePaths = await Promise.all(
+        output.map(async (url, index) => {
+          try {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const fileName = uuidv4() + "-" + `generated_image_${index}.png`;
+            const outputPath = path.join(
+              path.resolve(__dirname, ".."),
+              "images",
+              "GeneratedproductImages",
+              fileName
+            );
+            fs.writeFileSync(outputPath, buffer);
+            return `/images/GeneratedproductImages/${fileName}`;
+          } catch (error) {
+            console.log(
+              `Failed to fetch or save image at index ${index}:`,
+              error
+            );
+            throw error;
+          }
+        })
+      );
+
+      res.status(200).json({ imagePaths });
+    } catch (error) {
+      console.error("Error processing the images:", error);
+      return res.status(500).render("admin/edit-product", {
+        pageTitle: "Add Product",
+        path: "/admin/add-product",
+        editing: false,
+        hasError: true,
+        product: {
+          title: req.body.title,
+          price: req.body.price,
+          description: req.body.description,
+          category: req.body.category,
+        },
+        errorMessage: "An error occurred while generating the images.",
+        validationErrors: [],
+      });
+    }
+  } else {
+    res.status(400).json({ error: "No images generated." });
+  }
+};
+
 exports.postAddProduct = async (req, res, next) => {
   const title = req.body.title;
   const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
   const category = req.body.category;
+  const isGenerated = req.body.isGenerated === "true"; // Convert string to boolean
+  let selectedImageSrc = req.body.selectedImageSrc || "";
   let categoryFields = {};
+
+  console.log(selectedImageSrc);
 
   if (!image) {
     return res.status(422).render("admin/edit-product", {
@@ -57,42 +194,52 @@ exports.postAddProduct = async (req, res, next) => {
         price: price,
         category: category,
         description: description,
-        ...req.body,
       },
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
     });
   }
 
-  if (category === "Electronics") {
-    categoryFields = {
-      electronics: {
-        warranty: req.body.warranty,
-      },
-    };
-  } else if (category === "Clothing") {
-    categoryFields = {
-      clothing: {
-        size: req.body.size,
-        material: req.body.material,
-      },
-    };
-  } else if (category === "Books") {
-    categoryFields = {
-      books: {
-        author: req.body.author,
-        isbn: req.body.isbn,
-      },
-    };
-  } else if (category === "Toys") {
-    categoryFields = {
-      toys: {
-        ageRange: req.body.ageRange,
-      },
-    };
+  switch (category) {
+    case "Electronics":
+      categoryFields = {
+        electronics: {
+          warranty: req.body.warranty,
+        },
+      };
+      break;
+    case "Clothing":
+      categoryFields = {
+        clothing: {
+          size: req.body.size,
+          material: req.body.material,
+        },
+      };
+      break;
+    case "Books":
+      categoryFields = {
+        books: {
+          author: req.body.author,
+          isbn: req.body.isbn,
+        },
+      };
+      break;
+    case "Toys":
+      categoryFields = {
+        toys: {
+          ageRange: req.body.ageRange,
+        },
+      };
+      break;
   }
 
-  const imageUrl = image.path;
+  let imageUrl = image.path;
+
+  if (isGenerated && selectedImageSrc != "") {
+    selectedImageSrc = selectedImageSrc.replace("/images/productImages/", "");
+    moveFile(selectedImageSrc, "GeneratedproductImages", "productImages");
+    imageUrl = "images/productImages/" + selectedImageSrc;
+  }
 
   const product = new Product({
     title: title,
@@ -166,6 +313,8 @@ exports.postEditProduct = (req, res, next) => {
   const image = req.file;
   const updatedDesc = req.body.description;
   const updatedCategory = req.body.category;
+  const isGenerated = req.body.isGenerated === "true"; // Convert string to boolean
+  let selectedImageSrc = req.body.selectedImageSrc || "";
 
   const errors = validationResult(req);
 
@@ -181,7 +330,7 @@ exports.postEditProduct = (req, res, next) => {
         description: updatedDesc,
         category: updatedCategory,
         _id: prodId,
-        ...req.body, // Include other category-specific fields from the request body
+        ...req.body,
       },
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
@@ -229,7 +378,10 @@ exports.postEditProduct = (req, res, next) => {
 
       if (image) {
         fileHelper.deleteFile(product.imageUrl);
-        product.imageUrl = image.path;
+        if (isGenerated && selectedImageSrc != "") {
+          selectedImageSrc = selectedImageSrc.substring(1);
+          product.imageUrl = selectedImageSrc;
+        } else product.imageUrl = image.path;
       }
       return product.save().then((result) => {
         console.log("UPDATED PRODUCT!");

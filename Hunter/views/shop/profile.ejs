@@ -1,4 +1,5 @@
 <%- include('../includes/head.ejs') %>
+
 <body style="background-color: #f3f3f3;">
     <%- include('../includes/navigation.ejs') %>
     <main class="m-5 ">
@@ -38,7 +39,7 @@
                 <% for (let product of products) { %>
                     <div class="col">
                         <div class="card text-center h-100">
-                            <img src="/<%= product.imageUrl %>" class="card-img-top img-fluid" alt="product image"/>
+                            <img src="/<%= product.imageUrl %>" class="card-img-top img-fluid" alt="product image" loading="lazy"/>
                             <div class="card-body">
                               <h2 class="card-title"><%= product.title %></h2>
                               <div class="card-text">

@@ -290,9 +290,7 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
-  // Token is created using Checkout or Elements!
-  // Get the payment token ID submitted by the form:
-  const token = req.body.stripeToken; // Using Express
+  const token = req.body.stripeToken; 
   let totalSum = 0;
 
   req.user

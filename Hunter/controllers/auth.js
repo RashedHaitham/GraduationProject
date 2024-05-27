@@ -62,6 +62,7 @@ exports.getSignup = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+  //const rememberMe = req.body.rememberMe;
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -97,6 +98,11 @@ exports.postLogin = (req, res, next) => {
           if (doMatch) {
             req.session.isLoggedIn = true;
             req.session.user = user;
+            /*if (rememberMe) {
+              req.session.cookie.maxAge = 7 * 24 * 60 * 60 * 1000; // 1 week
+            } else {
+              req.session.cookie.expire = false;
+            }*/
             return req.session.save((err) => {
               console.log(err);
               res.redirect("/");
@@ -128,10 +134,10 @@ exports.postLogin = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  const firstName=req.body.firstName;
-  const lastName=req.body.lastName;
-  const number=req.body.number;
-  const userType=req.body.userType;
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const number = req.body.number;
+  const userType = req.body.userType;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors.array());
@@ -144,7 +150,7 @@ exports.postSignup = (req, res, next) => {
         password: password,
         confirmPassword: req.body.confirmPassword,
         firstName: firstName,
-        lastName:lastName,
+        lastName: lastName,
         number: number,
       },
       validationErrors: errors.array(),
@@ -156,11 +162,11 @@ exports.postSignup = (req, res, next) => {
     .then((hashedPassword) => {
       const user = new User({
         email: email,
-        firstName:firstName,
-        lastName:lastName,
-        number:number,
-        picture:"",
-        userType:userType,
+        firstName: firstName,
+        lastName: lastName,
+        number: number,
+        picture: "",
+        userType: userType,
         password: hashedPassword,
         cart: { items: [] },
       });
@@ -168,12 +174,6 @@ exports.postSignup = (req, res, next) => {
     })
     .then((result) => {
       res.redirect("/login");
-      // return transporter.sendMail({
-      //   to: email,
-      //   from: 'info@hunter.com',
-      //   subject: 'Signup succeeded!',
-      //   html: '<h1>You successfully signed up!</h1>'
-      // });
     })
     .catch((err) => {
       const error = new Error(err);

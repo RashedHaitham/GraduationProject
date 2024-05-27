@@ -1,4 +1,3 @@
-const path = require("path");
 
 const express = require("express");
 const { body } = require("express-validator/check");
@@ -69,6 +68,13 @@ router.get(
   isAuth,
   isVendor,
   adminController.getCustomerOrders
+);
+
+router.post(
+  "/generate-images",
+  isAuth,
+  isVendor,
+  adminController.generateImages
 );
 
 module.exports = router;

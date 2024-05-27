@@ -27,6 +27,7 @@ function getTextWidth(text) {
 sendButton.addEventListener('click', sendMessage);
 function sendMessage() {
   const message = chatInput.value;
+  
 
   displayMessage('user', message); // Display the message as sent by the user
 
@@ -40,7 +41,7 @@ function sendMessage() {
     }),
     headers: { 
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${process.env.CODY_API_TOKEN}' 
+        'Authorization': 'Bearer 9SofBEfYwtYVP2y9cQ2qHBS7b9R1eWgFue5cWB8u' 
     }
 })
 .then(response => {
