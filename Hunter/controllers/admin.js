@@ -36,11 +36,13 @@ async function getImageBase64(imagePath) {
 // Move a file from sourceDir to destinationDir
 function moveFile(file, sourceDir, destinationDir) {
   fs.readdir(sourceDir, (err, files) => {
+    console.log("sourceDir : ",sourceDir);
+
     if (err) {
       console.error("Error reading directory:", err);
       return;
     }
- 
+
     if (files.length > 0) {
       const sourcePath = path.join(sourceDir, file);
       const destinationPath = path.join(destinationDir, file);
@@ -109,7 +111,7 @@ exports.generateImages = async (req, res, next) => {
             const response = await fetch(url);
             const arrayBuffer = await response.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
-            const fileName = uuidv4() + "-" + `generated_image_${index}.png`;
+            const fileName = uuidv4() + "-" + `generated_image_${image.originalname}.png`;
             const outputPath = path.join(
               path.resolve(__dirname, ".."),
               "images",
@@ -157,11 +159,8 @@ exports.postAddProduct = async (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
   const category = req.body.category;
-  const isGenerated = req.body.isGenerated === "true"; // Convert string to boolean
   let selectedImageSrc = req.body.selectedImageSrc || "";
   let categoryFields = {};
-
-  console.log(selectedImageSrc);
 
   if (!image) {
     return res.status(422).render("admin/edit-product", {
@@ -235,10 +234,18 @@ exports.postAddProduct = async (req, res, next) => {
 
   let imageUrl = image.path;
 
-  if (isGenerated && selectedImageSrc != "") {
-    selectedImageSrc = selectedImageSrc.replace("/images/productImages/", "");
-    moveFile(selectedImageSrc, "GeneratedproductImages", "productImages");
+  if (selectedImageSrc != "") {
+    selectedImageSrc = selectedImageSrc.replace(
+      "/images/GeneratedproductImages/",
+      ""
+    );
+    moveFile(
+      selectedImageSrc,
+      "images/GeneratedproductImages",
+      "images/productImages"
+    );
     imageUrl = "images/productImages/" + selectedImageSrc;
+    console.log(imageUrl);
   }
 
   const product = new Product({
@@ -377,12 +384,20 @@ exports.postEditProduct = (req, res, next) => {
       }
 
       if (image) {
-        fileHelper.deleteFile(product.imageUrl);
-        if (isGenerated && selectedImageSrc != "") {
-          selectedImageSrc = selectedImageSrc.substring(1);
-          product.imageUrl = selectedImageSrc;
+        if (selectedImageSrc != "") {
+          selectedImageSrc = selectedImageSrc.replace(
+            "/images/GeneratedproductImages/",
+            ""
+          );
+          moveFile(
+            selectedImageSrc,
+            "images/GeneratedproductImages",
+            "images/productImages"
+          );
+          product.imageUrl = "images/productImages/" + selectedImageSrc;
         } else product.imageUrl = image.path;
       }
+
       return product.save().then((result) => {
         console.log("UPDATED PRODUCT!");
         res.redirect("/admin/products");

@@ -71,7 +71,7 @@
             <div class="form-group mt-3" id="textAreaContainer" style="display: none;">
                 <textarea name="prompt" class="form-control" id="textArea" rows="3" placeholder="Enter your prompt here"></textarea>
             </div>
-            <button type="button" id="generateButton" class="btn btn-primary mt-3 mb-3" style="display: none;" disabled>Generate Images</button>            
+            <button type="button" id="generateButton" class="btn btn-primary mt-3 mb-3" style="display: none !important;" disabled>Generate Images</button>            
 
             <div id="imgSlider" class="slider-container" style="display: none;">
                 <div class="slider">
@@ -205,7 +205,7 @@
 
         });
 
-        document.getElementById('toggleCheckbox').addEventListener('change', function() {
+    document.getElementById('toggleCheckbox').addEventListener('change', function() {
     const textAreaContainer = document.getElementById('textAreaContainer');
     const textArea = document.getElementById('textArea');
     const generateButton = document.getElementById('generateButton');
@@ -213,12 +213,10 @@
 
     if (this.checked) {
         textAreaContainer.style.display = 'block';
-        generateButton.style.display = 'inline-block';
         imageSlider.style.display='block';
     } else {
         textAreaContainer.style.display = 'none';
         textArea.value = '';
-        generateButton.style.display = 'none';
         imageSlider.style.display='none';
         $('.slider img').removeClass('selected');
         $('#selectedImageSrc').val('');
@@ -297,13 +295,23 @@ $(document).ready(function() {
                 $slider.css('transform', `translateX(${newTransform}px)`);
             }
 
-            $('#image').on('change', function() {
-                if ($(this).val()) {
-                    $('#generateButton').prop('disabled', false).show();
+            function updateButtonState() {
+                const imageUploaded = $('#image').get(0).files.length > 0;
+                const checkboxChecked = $('#toggleCheckbox').is(':checked');
+
+                if (checkboxChecked) {
+                    $('#generateButton').show();
                 } else {
-                    $('#generateButton').prop('disabled', true).hide();
+                    $('#generateButton').hide();
                 }
-            });
+
+                $('#generateButton').prop('disabled', !(imageUploaded && checkboxChecked));
+            }
+
+            $('#image').on('change', updateButtonState);
+            $('#toggleCheckbox').on('change', updateButtonState);
+
+            updateButtonState();
 
             $('.slider').on('click', 'img', function() {
                 $('.slider img').removeClass('selected');
